@@ -1,4 +1,5 @@
 var express = require('express');
+var validator = require('express-validator');
 var bodyParser = require('body-parser');
 var passport = require('passport');
 var ExtractJwt = require('passport-jwt').ExtractJwt;
@@ -12,6 +13,7 @@ var serviceAccount = require(`./config/${appConfig.firebase_cert_file}`);
 var app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(validator());
 
 // Firebase admin / client
 admin.initializeApp({

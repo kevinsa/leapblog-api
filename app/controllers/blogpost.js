@@ -1,4 +1,5 @@
 const blogPostsBasePath = '/blogposts';
+const requestValidator = require('../../validation/blogposts');
 
 module.exports = (router, passport, database) => {
 
@@ -8,10 +9,6 @@ module.exports = (router, passport, database) => {
 
   var _getBlogPostRef = (blogpostId) => {
     return database.ref(`${blogPostsBasePath}/${blogpostId}`);
-  }
-
-  var _canEditOrDelete = (blogpost, user) => {
-    return blogpost.user === user.uid;
   }
 
   /*
@@ -46,10 +43,15 @@ module.exports = (router, passport, database) => {
   * Create a new blog post
   */
   router.post('/blogposts', passport.authenticate('jwt', { session: false }), (req, res) => {
-    const { title, content } = req.body
     
-    if(title && content) {
-      
+    var errors = requestValidator.validateRequest(req);
+
+    if(errors) {
+      res.status(400).json( { errors: errors });
+    }
+    else {
+      const { title, content } = req.body;
+
       var blogPostRef = _getBlogPostsRef().push({
         title: title,
         content: content,
@@ -59,10 +61,6 @@ module.exports = (router, passport, database) => {
 
       res.status(200).json({ blogpost_ref: blogPostRef });
     }
-    else 
-    {
-      res.status(400).json({ message: 'unable to create blog post' });
-    }
   });
 
   /*
@@ -70,34 +68,41 @@ module.exports = (router, passport, database) => {
   */
   router.put('/blogposts/:id', passport.authenticate('jwt', { session: false }), (req, res) => {
 
-    const { id } = req.params;
-    const { title, content } = req.body;
+    var errors = requestValidator.validateRequest(req);
 
-    _getBlogPostRef(id).once('value', (snap) => {
-      let blogPost = snap.val();
-      if(blogPost) {
-        if(_canEditOrDelete(blogPost, req.user)){
-          _getBlogPostRef(id).update({ title, content, date: Date.now() }, (err) => {
-            if(!err) {
-              res.status(204).json({ message: `updated blog post: ${id}`});
-            }
-            else 
-            {
-              res.status(500).json({ 
-                message: `unable to update blog post: ${id}`, 
-                error: err 
-              });
-            }
-          });
+    if(errors) {
+      res.status(400).json( { errors: errors });
+    }
+    else {
+      const { id } = req.params;
+      const { title, content } = req.body;
+  
+      _getBlogPostRef(id).once('value', (snap) => {
+        let blogPost = snap.val();
+        if(blogPost) {
+          if(requestValidator.canEditOrDelete(blogPost, req)){
+            _getBlogPostRef(id).update({ title, content, date: Date.now() }, (err) => {
+              if(!err) {
+                res.status(204).json({ message: `updated blog post: ${id}`});
+              }
+              else 
+              {
+                res.status(500).json({ 
+                  message: `unable to update blog post: ${id}`, 
+                  error: err 
+                });
+              }
+            });
+          }
+          else {
+            res.status(401).json({ message: `unauthorized to modify blog post: ${id}` });
+          }
         }
         else {
-          res.status(401).json({ message: `unauthorized to modify blog post: ${id}` });
+          res.status(404).json({ message: `unable to locate blog post: ${id}` });
         }
-      }
-      else {
-        res.status(404).json({ message: `unable to locate blog post: ${id}` });
-      }
-    });
+      });
+    }
   });
 
   /*
@@ -110,7 +115,7 @@ module.exports = (router, passport, database) => {
     _getBlogPostRef(id).once('value', (snap) => {
       let blogPost = snap.val();
       if(blogPost) {
-        if(_canEditOrDelete(blogPost, req.user)){
+        if(requestValidator.canEditOrDelete(blogPost, req)){
           _getBlogPostRef(id).remove((err) => {
             if(!err) {
               res.status(204).json({ message: `removed blog post: ${id}`});

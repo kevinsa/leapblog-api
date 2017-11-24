@@ -1,4 +1,5 @@
 const commentsBasePath = '/comments';
+const requestValidator = require('../../validation/blogcomments');
 
 module.exports = (router, passport, database) => {
 
@@ -8,10 +9,6 @@ module.exports = (router, passport, database) => {
 
   var _getCommentRef = (blogId, commentId) => {
     return database.ref(`${commentsBasePath}/${blogId}/${commentId}`);
-  }
-
-  var _canEditOrDelete = (comment, user) => {
-    return comment.user === user.uid;
   }
   
   /*
@@ -31,20 +28,27 @@ module.exports = (router, passport, database) => {
   */
   router.post('/blogposts/:blogid/comments', passport.authenticate('jwt', { session: false }), (req, res) => {
 
-    const { blogid } = req.params;
-    const { content } = req.body;
-    if(content) {
-      var commentRef = _getCommentsRef(blogid).push({
-        content: content,
-        user: req.user.uid,
-        date: Date.now()
-      });
-
-      res.status(200).json({ comment_ref: commentRef });
+    var errors = requestValidator.validateRequest(req);
+    
+    if(errors) {
+      res.status(400).json( { errors: errors });
     }
-    else
-    {
-      res.status(500).json({ message: `unable to add comment to blog post: ${blogid}`});
+    else {
+      const { blogid } = req.params;
+      const { content } = req.body;
+      if(content) {
+        var commentRef = _getCommentsRef(blogid).push({
+          content: content,
+          user: req.user.uid,
+          date: Date.now()
+        });
+  
+        res.status(200).json({ comment_ref: commentRef });
+      }
+      else
+      {
+        res.status(500).json({ message: `unable to add comment to blog post: ${blogid}`});
+      }
     }
   });
 
@@ -53,41 +57,48 @@ module.exports = (router, passport, database) => {
   */
   router.put('/blogposts/:blogid/comments/:commentid', passport.authenticate('jwt', { session: false }), (req, res) => {
 
-    const { blogid, commentid } = req.params;
-    const { content } = req.body;
+    var errors = requestValidator.validateRequest(req);
     
-    _getCommentRef(blogid, commentid).once('value', (snap) => {
-      let comment = snap.val();
-      if(comment) {
-        if(_canEditOrDelete(comment, req.user)){
-          //update the comment
-          _getCommentRef(blogid, commentid).update({
-            content,
-            date: Date.now()
-          }, (err) => {
-            if(!err) {
-              res.status(204).json({ message: `updated comment: ${commentid} on blog post: ${blogid}`});
-            }
-            else
-            {
-              res.status(500).json({ 
-                message: `unable to update comment: ${commentid} on blog post: ${blogid}`,
-                error: err
-              });
-            }
-          });
-        }
-        else
-        {
-          res.status(401).json({ message: `unauthorized to modify comment: ${commentid}` });
-        }
-      }
-      else 
-      {
-        res.status(404).json({ message: `unable to locate comment: ${commentid}` });
-      }
+    if(errors) {
+      res.status(400).json( { errors: errors });
+    }
+    else {
+      const { blogid, commentid } = req.params;
+      const { content } = req.body;
       
-    });
+      _getCommentRef(blogid, commentid).once('value', (snap) => {
+        let comment = snap.val();
+        if(comment) {
+          if(requestValidator.canEditOrDelete(comment, req)){
+            //update the comment
+            _getCommentRef(blogid, commentid).update({
+              content,
+              date: Date.now()
+            }, (err) => {
+              if(!err) {
+                res.status(204).json({ message: `updated comment: ${commentid} on blog post: ${blogid}`});
+              }
+              else
+              {
+                res.status(500).json({ 
+                  message: `unable to update comment: ${commentid} on blog post: ${blogid}`,
+                  error: err
+                });
+              }
+            });
+          }
+          else
+          {
+            res.status(401).json({ message: `unauthorized to modify comment: ${commentid}` });
+          }
+        }
+        else 
+        {
+          res.status(404).json({ message: `unable to locate comment: ${commentid}` });
+        }
+        
+      });
+    }
   });
 
   /*
@@ -100,7 +111,7 @@ module.exports = (router, passport, database) => {
         _getCommentRef(blogid, commentid).once('value', (snap) => {
           let comment = snap.val();
           if(comment) {
-            if(_canEditOrDelete(comment, req.user)){
+            if(requestValidator.canEditOrDelete(comment, req)){
               //delete the comment
               _getCommentRef(blogid, commentid).remove((err) => {
                 if(!err) {
