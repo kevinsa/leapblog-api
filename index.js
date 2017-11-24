@@ -4,40 +4,30 @@ var passport = require('passport');
 var ExtractJwt = require('passport-jwt').ExtractJwt;
 var JwtStrategy = require('passport-jwt').Strategy;
 var appConfig = require('./config/appconfig.js').config();
+var client = require('firebase');
+var admin = require('firebase-admin');
+var serviceAccount = require(`./config/${appConfig.firebase_cert_file}`);
 
-console.log(appConfig);
-
+// Express
 var app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// Passport
-/*
-var jwtConfig = { secretOrKey: 'leapblogsecretkey' }
-var jwtOpts = {};
-jwtOpts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
-jwtOpts.secretOrKey = jwtConfig.secretOrKey;
-var strategy = new JwtStrategy(jwtOpts, (jwtPayload, next) => {
-  var user = { id: 1 };
-  
-  console.log('jwt payload: ' + jwtPayload);
-  if(user) {
-    next(null, user);
-  }
-  else
-  {
-    next(null, false);
-  }
+// Firebase admin / client
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: appConfig.firebase_url
 });
-passport.use(strategy);
-*/
-require('./config/passport.js')(passport, appConfig);
+client.initializeApp(appConfig.firebase_client_config);
+
+// Passport
+require('./config/passport.js')(passport, appConfig, admin);
 app.use(passport.initialize());
 
 // Routes
 var router = express.Router();
 app.use('/api', router);
-require('./app/controllers/auth.js')(router, appConfig);
+require('./app/controllers/auth.js')(router, admin, client);
 require('./app/controllers/blogpost.js')(router, passport);
 require('./app/controllers/blogcomment.js')(router, passport);
 
