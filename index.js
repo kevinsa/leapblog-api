@@ -19,6 +19,7 @@ admin.initializeApp({
   databaseURL: appConfig.firebase_url
 });
 client.initializeApp(appConfig.firebase_client_config);
+var database = admin.database();
 
 // Passport
 require('./config/passport.js')(passport, appConfig, admin);
@@ -28,8 +29,8 @@ app.use(passport.initialize());
 var router = express.Router();
 app.use('/api', router);
 require('./app/controllers/auth.js')(router, admin, client);
-require('./app/controllers/blogpost.js')(router, passport);
-require('./app/controllers/blogcomment.js')(router, passport);
+require('./app/controllers/blogpost.js')(router, passport, database);
+require('./app/controllers/blogcomment.js')(router, passport, database);
 
 
 var port = process.env.PORT || 8090;
