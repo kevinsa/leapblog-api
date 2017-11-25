@@ -1,13 +1,21 @@
 var jwt = require('jsonwebtoken');
 var appConfig = require('../../config/appconfig.js').config();
+const registerRequestValidator = require('../../validation/registration');
+const loginRequestValidator = require('../../validation/login');
 
 
 module.exports = (router, admin, client) => {
 
   router.post('/login', (req, res) => {
-    const { username, password } = req.body;
 
-    client.auth().signInWithEmailAndPassword(username, password)
+    var errors = loginRequestValidator.validateRequest(req);
+    if(errors) {
+      res.status(400).json( { errors: errors });
+    }
+    else {
+      const { username, password } = req.body;
+
+      client.auth().signInWithEmailAndPassword(username, password)
       .then((user) => {
         var payload = { id: user.uid }
         var token = jwt.sign(payload, appConfig.jwtSecretOrKey) 
@@ -19,25 +27,33 @@ module.exports = (router, admin, client) => {
       .catch((err) => {
         res.status(401).json({ message: err });
       });
+    }
   })
 
   router.post('/register', (req, res) => {
 
-    const { name, email, password } = req.body;
+    var errors = registerRequestValidator.validateRequest(req);
+    
+    if(errors) {
+      res.status(400).json( { errors: errors });
+    }
+    else {
+      const { name, email, password } = req.body;
 
-    admin.auth().createUser({
-      email: email,
-      password: password,
-      displayName: name,
-      disabled: false,
-      emailVerified: false,
-    })
-      .then((user) => {
-        res.status(200).json({ name: name, email: email, password: password })
+      admin.auth().createUser({
+        email: email,
+        password: password,
+        displayName: name,
+        disabled: false,
+        emailVerified: false,
       })
-      .catch((err) => {
-        res.status(500).json({ message: err });
-      });
+        .then((user) => {
+          res.status(200).json({ name: name, email: email, password: password })
+        })
+        .catch((err) => {
+          res.status(500).json({ message: err });
+        });
+    }
   });
 
 };
