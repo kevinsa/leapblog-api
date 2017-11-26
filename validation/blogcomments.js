@@ -6,6 +6,6 @@ module.exports  = {
     return req.validationErrors();
   },
   canEditOrDelete(comment, req) {
-    return comment.user === req.user.uid;
+    return comment.user.uid === req.user.uid;
   }
 };

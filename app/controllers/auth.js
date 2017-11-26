@@ -17,12 +17,14 @@ module.exports = (router, admin, client) => {
 
       client.auth().signInWithEmailAndPassword(username, password)
       .then((user) => {
-        var payload = { id: user.uid }
+        var payload = { id: user.uid, name: user.displayName }
         var token = jwt.sign(payload, appConfig.jwtSecretOrKey) 
         res.status(200).json({ 
           message: "success", 
           token: token, 
-          uid: user.uid });
+          uid: user.uid,
+          name: user.displayName
+        });
       })
       .catch((err) => {
         res.status(401).json({ message: err });

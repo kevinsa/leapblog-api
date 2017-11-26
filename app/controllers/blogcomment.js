@@ -1,5 +1,6 @@
 const commentsBasePath = '/comments';
 const requestValidator = require('../../validation/blogcomments');
+const responseFormatter = require('../../formatting/snapshot');
 
 module.exports = (router, passport, database) => {
 
@@ -19,7 +20,7 @@ module.exports = (router, passport, database) => {
     const { blogid } = req.params;
 
     _getCommentsRef(blogid).once('value', (snap) => {
-      res.status(200).json({ comments: snap.val() });
+      res.status(200).json({ comments: responseFormatter.snapToArray(snap) });
     });
   });
 
@@ -39,7 +40,10 @@ module.exports = (router, passport, database) => {
       if(content) {
         var commentRef = _getCommentsRef(blogid).push({
           content: content,
-          user: req.user.uid,
+          user: {
+            uid: req.user.uid,
+            displayName: req.user.displayName
+          },
           date: Date.now()
         });
   

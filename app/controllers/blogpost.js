@@ -1,5 +1,6 @@
 const blogPostsBasePath = '/blogposts';
 const requestValidator = require('../../validation/blogposts');
+const responseFormatter = require('../../formatting/snapshot');
 
 module.exports = (router, passport, database) => {
 
@@ -15,11 +16,9 @@ module.exports = (router, passport, database) => {
   * Get all blog posts
   */
   router.get('/blogposts', (req, res) => {
-    
     _getBlogPostsRef().once('value', (snap) => {
-      res.status(200).json({ blogposts: snap.val() });
+      res.status(200).json({ blogposts: responseFormatter.snapToArray(snap) });
     });
-    
   });
 
   /*
@@ -55,7 +54,10 @@ module.exports = (router, passport, database) => {
       var blogPostRef = _getBlogPostsRef().push({
         title: title,
         content: content,
-        user: req.user.uid,
+        user: {
+          uid: req.user.uid,
+          displayName: req.user.displayName
+        },
         date: Date.now()
       });
 

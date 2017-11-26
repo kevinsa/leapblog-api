@@ -9,6 +9,6 @@ module.exports  = {
     return req.validationErrors();
   },
   canEditOrDelete(blogPost, req) {
-    return blogPost.user === req.user.uid;
+    return blogPost.user.uid === req.user.uid;
   }
 };
