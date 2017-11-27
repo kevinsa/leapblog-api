@@ -38,16 +38,18 @@ module.exports = (router, passport, database) => {
       const { blogid } = req.params;
       const { content } = req.body;
       if(content) {
-        var commentRef = _getCommentsRef(blogid).push({
+        var comment = {
           content: content,
           user: {
             uid: req.user.uid,
             displayName: req.user.displayName
           },
           date: Date.now()
-        });
-  
-        res.status(200).json({ comment_ref: commentRef });
+        };
+
+        var commentRef = _getCommentsRef(blogid).push(comment);
+        comment.key = commentRef.key;
+        res.status(200).json({ comment: comment, comment_ref: commentRef });
       }
       else
       {

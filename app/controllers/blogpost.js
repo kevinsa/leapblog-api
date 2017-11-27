@@ -50,8 +50,7 @@ module.exports = (router, passport, database) => {
     }
     else {
       const { title, content } = req.body;
-
-      var blogPostRef = _getBlogPostsRef().push({
+      var blogPost = {
         title: title,
         content: content,
         user: {
@@ -59,9 +58,11 @@ module.exports = (router, passport, database) => {
           displayName: req.user.displayName
         },
         date: Date.now()
-      });
-
-      res.status(200).json({ blogpost_ref: blogPostRef });
+      }
+      
+      var blogPostRef = _getBlogPostsRef().push();
+      blogPost.key = blogPostRef.key;
+      res.status(200).json({ blogpost: blogPost, blogpost_ref: blogPostRef });
     }
   });
 
