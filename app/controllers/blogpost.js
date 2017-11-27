@@ -60,7 +60,7 @@ module.exports = (router, passport, database) => {
         date: Date.now()
       }
       
-      var blogPostRef = _getBlogPostsRef().push();
+      var blogPostRef = _getBlogPostsRef().push(blogPost);
       blogPost.key = blogPostRef.key;
       res.status(200).json({ blogpost: blogPost, blogpost_ref: blogPostRef });
     }
