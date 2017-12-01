@@ -33,6 +33,8 @@ ExpressJS is serving as a proxy and exposing a standard API for interacting with
  ## Roadmap
 
  ### User Interface
+ 
+ - Styling needs some love due to me not catching the link to the design concept until the last minute.  Continue migrating styles from index.css to styled components and reduce the dependenacy on index.css while making the components/container marked more semantic
 
  - Refactor to connecting container components to redux like BlogPostList. This would clean up alot of the passing around of callbacks and logged in user state.
 
