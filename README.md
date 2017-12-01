@@ -29,6 +29,30 @@ ExpressJS is serving as a proxy and exposing a standard API for interacting with
  - Provides an extensible layer that can be used to introduce additional processing or enforcement of business rules without impacting the user interface
  - Enables us to scale the backend layer independently from the user interface.  The layer can be moved onto multiple servers and fronted by a load balancer without having to scale servers hosting the user interface
  - Enables us to create various types of user interface clients without having to replicate backend data processing or business logic.  We can have iOS, Andriod, and perhaps Magic Leap clients leveraging the same backend API.
+
+ ## Roadmap
+
+ ### User Interface
+
+ - Refactor to connecting container components to redux like BlogPostList. This would clean up alot of the passing around of callbacks and logged in user state.
+
+ - Look for a better approach to form validation so that we are not repeating the validation logic in all form components
+
+ - Look for a better approach for displaying loading indication while http requests are in flight.
+
+ - Some components in the components directory are acting as containers with state, these should be moved into the containers directory instead to keep the components directory reserved for presentational components
+
+ - Create components for html markup that's currently repeated like the blog post, comment edit and delete buttons
+
+ ### Operational
+
+ - Add some logging functionality currently there are no application logs being written to to assist with troublshooting
+
+ - Implement monitoring so that we can be aware of any applicaiton or performance issues.
+
+ ### Architectural
+
+ - Look into refactoring the backend into a serverless architecture so that we dont have to maintain the VPS and pay based on usage rather than server up-time. 
  
 
 ## Getting Started
@@ -54,7 +78,7 @@ node --version
 npm --version
 ```
 #### Setting Up The Backend API
-Please note that the source code will attempt to start a server listening on port 8090.  Please make sure this is available on your machine.  If not, the code can be modified to use another port in index.js.
+Please note that the source code will attempt to start a server listening on port 8090.  Please make sure this is available on your machine.  If not, the code can be modified to use another port in index.js.  Also, the backed will attept to connect to firebase which requires a file called firebase-cert-dev.json to be in the config directory.  This file is not checked into source control but can be download from the link I provided to Jared.
 
 Download the source
 
@@ -77,7 +101,7 @@ node index.js
 Alternately, if you intend to make source code changes you can use nodemon to re-start the server when files are updated.
 
 #### Setting Up The User Interface
-Note that the code is configured to make http requests to http://localhost:8090.  Please make sure this is up and running in order for the UI to properly render.
+Note that the code is configured to make http requests to http://localhost:8090.  Please make sure this is up and running in order for the UI to properly render.  As an alternative, the user interface can be configured to use the live backend by updating the apiBaseUrl property value from localhost:8090 to 34.226.117.113 in config/AppConfig.js
 
 Install Create React App
 
