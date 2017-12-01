@@ -34,7 +34,9 @@ ExpressJS is serving as a proxy and exposing a standard API for interacting with
 
  ### User Interface
  
- - Styling needs some love due to me not catching the link to the design concept until the last minute.  Continue migrating styles from index.css to styled components and reduce the dependenacy on index.css while making the components/container mark up more semantic
+ - Styling needs some love due to me not catching the link to the design concept until the last minute.  Continue migrating styles from index.css to styled components and reduce the dependenacy on index.css while making the components/container markup more semantic
+ 
+ - Urls need to be prettier.  Look into using slugs instead of using the firebase keys for blog post Urls (ie /blogposts/my-interesting-blog)
  
  - Dates on comments and blog posts can be displayed in a more user friendly format.  Bring in a library like momentjs and provide better formatting (ie 2 days ago)
 
@@ -57,6 +59,8 @@ ExpressJS is serving as a proxy and exposing a standard API for interacting with
  ### Architectural
 
  - Look into refactoring the backend into a serverless architecture so that we dont have to maintain the VPS and pay based on usage rather than server up-time. 
+ 
+ - Look into server side rendering for better SEO.
  
 
 ## Getting Started
