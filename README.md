@@ -132,6 +132,7 @@ This will start the application up on port 3000 and open up a browser window on 
 ## Built With
 
 * [React](https://reactjs.org/) - User Interface
+* [Redux](https://redux.js.org/) - Application State
 * [Bootstrap](https://getbootstrap.com/) - UI Style Framework
 * [Styled Components](https://www.styled-components.com/) - React Component Styling 
 * [ExpressJS](https://expressjs.com/) - Backend API
