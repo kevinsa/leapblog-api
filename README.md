@@ -55,6 +55,10 @@ ExpressJS is serving as a proxy and exposing a standard API for interacting with
  - Add some logging functionality currently there are no application logs being written to to assist with troublshooting
 
  - Implement monitoring so that we can be aware of any applicaiton or performance issues.
+ 
+ - Automate the build and deployment
+ 
+ - Implement unit test case suite (refactor code as required) and implement end to end integration test suite
 
  ### Architectural
 
